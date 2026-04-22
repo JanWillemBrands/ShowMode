@@ -7,12 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4EE331952F8B814300F23CD8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4EE331942F8B814300F23CD8 /* SceneDelegate.swift */; };
 		4EF4F3ED2F8B57FA005F0E90 /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = 4EF4F3EC2F8B57EF005F0E90 /* CLAUDE.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		4EE331942F8B814300F23CD8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		4EF4F3D82F8B42BD005F0E90 /* ShowMode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShowMode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EF4F3EC2F8B57EF005F0E90 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -42,7 +40,6 @@
 				4EF4F3EC2F8B57EF005F0E90 /* CLAUDE.md */,
 				4EF4F3DA2F8B42BD005F0E90 /* ShowMode */,
 				4EF4F3D92F8B42BD005F0E90 /* Products */,
-				4EE331942F8B814300F23CD8 /* SceneDelegate.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -129,7 +126,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4EE331952F8B814300F23CD8 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,7 +263,7 @@
 				DEVELOPMENT_TEAM = 3A743G3S42;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
@@ -305,7 +301,7 @@
 				DEVELOPMENT_TEAM = 3A743G3S42;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = NO;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;

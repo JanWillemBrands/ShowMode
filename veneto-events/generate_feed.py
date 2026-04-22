@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""
+Generate a combined RSS feed from all Veneto event scrapers.
+Combines multi-date events (e.g. opera with 5 showings) into a single item.
+Output: docs/events.rss (served via GitHub Pages)
+"""
+
+import os
+import sys
+import traceback
+from collections import OrderedDict
+from datetime import datetime
+import feedgenerator
+
+from scrape_bru_zane import scrape as scrape_bru_zane
+from scrape_la_fenice import scrape as scrape_la_fenice
+from scrape_barcoteatro import scrape as scrape_barcoteatro
+from scrape_opv import scrape as scrape_opv
+from scrape_pollini import scrape as scrape_pollini
+
+OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "events.rss")
+
+SCRAPERS = [
+    ("Bru Zane", scrape_bru_zane),
+    ("La Fenice", scrape_la_fenice),
+    ("Barco Teatro", scrape_barcoteatro),
+    ("OPV", scrape_opv),
+    ("Pollini", scrape_pollini),
+]
+
+
+def format_dates_by_month(dates):
+    """Format dates grouped by month, e.g. 'Apr: 15, 19, 22 | May: 3, 10'."""
+    if len(dates) == 1:
+        return dates[0].strftime("%d %b")
+
+    by_month = OrderedDict()
+    for dt in sorted(dates):
+        month_key = dt.strftime("%b")
+        by_month.setdefault(month_key, []).append(dt.strftime("%d").lstrip("0"))
+
+    parts = []
+    for month, days in by_month.items():
+        parts.append(f"{month}: {', '.join(days)}")
+    return " | ".join(parts)
+
+
+def combine_events(events):
+    """Group events by URL (same production = same URL) and merge dates."""
+    grouped = OrderedDict()
+    for ev in events:
+        url = ev["url"]
+        if url in grouped:
+            grouped[url]["dates"].append(datetime.fromisoformat(ev["start"]))
+        else:
+            grouped[url] = {
+                **ev,
+                "dates": [datetime.fromisoformat(ev["start"])],
+            }
+
+    combined = []
+    for item in grouped.values():
+        item["dates"].sort()
+        item["first_date"] = item["dates"][0]
+        item["dates_display"] = format_dates_by_month(item["dates"])
+        combined.append(item)
+
+    combined.sort(key=lambda e: e["first_date"])
+    return combined
+
+
+def main():
+    all_events = []
+    errors = []
+
+    for name, scraper in SCRAPERS:
+        try:
+            print(f"Scraping {name}...")
+            events = scraper()
+            print(f"  Found {len(events)} events")
+            all_events.extend(events)
+        except Exception as e:
+            print(f"  ERROR scraping {name}: {e}")
+            traceback.print_exc()
+            errors.append(name)
+
+    if not all_events:
+        print("No events found from any source!")
+        return 1
+
+    all_events.sort(key=lambda e: e["start"])
+    combined = combine_events(all_events)
+    print(f"Total: {len(all_events)} showings -> {len(combined)} unique events")
+    if errors:
+        print(f"Failed scrapers: {', '.join(errors)}")
+
+    sources = [name for name, _ in SCRAPERS if name not in errors]
+    feed = feedgenerator.Rss201rev2Feed(
+        title="Veneto Events",
+        link="https://janwillembrands.github.io/veneto-events/",
+        description="Upcoming concerts, opera, and cultural events in Venice and the Veneto region. "
+                    f"Sources: {', '.join(sources)}.",
+        language="en",
+    )
+
+    for ev in combined:
+        # Description line 1: venue + dates (shown on the card)
+        venue = ev.get("venue", "")
+        desc_line1 = f"{venue} \u2022 {ev['dates_display']}" if venue else ev["dates_display"]
+        # Description line 2: type — source
+        meta = []
+        if ev.get("type"):
+            meta.append(ev["type"])
+        meta.append(ev.get("source", ""))
+        desc_line2 = " \u2014 ".join(p for p in meta if p)
+        description = f"{desc_line1}\n{desc_line2}"
+
+        enclosures = []
+        if ev.get("image"):
+            enclosures.append(feedgenerator.Enclosure(
+                url=ev["image"],
+                length="0",
+                mime_type="image/jpeg",
+            ))
+
+        feed.add_item(
+            title=ev["title"],
+            link=ev["url"],
+            description=description,
+            pubdate=ev["first_date"],
+            unique_id=ev["url"],
+            enclosures=enclosures if enclosures else None,
+        )
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+        feed.write(f, "utf-8")
+
+    print(f"RSS feed written to {OUTPUT_FILE}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

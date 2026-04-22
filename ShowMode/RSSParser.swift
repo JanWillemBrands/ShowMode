@@ -2,8 +2,6 @@
 //  RSSParser.swift
 //  ShowMode
 //
-//  Created by Johannes Brands on 2026.04.12.
-//
 
 import Foundation
 
@@ -11,6 +9,7 @@ struct RSSItem {
     let title: String
     let description: String
     let thumbnailURL: String?
+    let link: String?
 }
 
 class RSSParser: NSObject, XMLParserDelegate {
@@ -20,6 +19,7 @@ class RSSParser: NSObject, XMLParserDelegate {
     private var currentTitle = ""
     private var currentDescription = ""
     private var currentThumbnailURL: String?
+    private var currentLink = ""
     private var isInsideItem = false
     private var completion: (([RSSItem]) -> Void)?
 
@@ -54,11 +54,27 @@ class RSSParser: NSObject, XMLParserDelegate {
             currentTitle = ""
             currentDescription = ""
             currentThumbnailURL = nil
+            currentLink = ""
         }
-        // BBC RSS uses <media:thumbnail url="..."/>
-        if isInsideItem && (elementName == "media:thumbnail" || elementName == "thumbnail") {
-            if let url = attributeDict["url"] {
-                currentThumbnailURL = url
+        if isInsideItem {
+            // BBC uses media:thumbnail, Repubblica uses enclosure with image type
+            if elementName == "media:thumbnail" || elementName == "thumbnail" {
+                if let url = attributeDict["url"] {
+                    currentThumbnailURL = url
+                }
+            }
+            if elementName == "enclosure" {
+                if let type = attributeDict["type"], type.hasPrefix("image"),
+                   let url = attributeDict["url"] {
+                    currentThumbnailURL = url
+                }
+            }
+            // Also check media:content
+            if elementName == "media:content" {
+                if let medium = attributeDict["medium"], medium == "image",
+                   let url = attributeDict["url"] {
+                    currentThumbnailURL = currentThumbnailURL ?? url
+                }
             }
         }
     }
@@ -70,6 +86,8 @@ class RSSParser: NSObject, XMLParserDelegate {
             currentTitle += string
         case "description":
             currentDescription += string
+        case "link":
+            currentLink += string
         default:
             break
         }
@@ -85,12 +103,12 @@ class RSSParser: NSObject, XMLParserDelegate {
             let item = RSSItem(
                 title: currentTitle.trimmingCharacters(in: .whitespacesAndNewlines),
                 description: currentDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-                thumbnailURL: currentThumbnailURL
+                thumbnailURL: currentThumbnailURL,
+                link: currentLink.trimmingCharacters(in: .whitespacesAndNewlines)
             )
             items.append(item)
             isInsideItem = false
         }
-        // Reset currentElement when closing a tag to avoid appending stray characters
         if currentElement == elementName {
             currentElement = ""
         }
