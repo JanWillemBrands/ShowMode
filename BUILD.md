@@ -20,8 +20,11 @@ After editing in Xcode 26.4, just **Build** (Cmd+B). The scheme's post-build act
 
 1. Compiles all Swift sources with Xcode 14.3.1's `swiftc` for `arm64-apple-ios11.0`
 2. Links UIKit, Foundation, and WebKit frameworks
-3. Generates a concrete `Info.plist` with a real bundle identifier for the legacy IPA
-4. Packages the binary + Info.plist + LaunchScreen into `~/Desktop/ShowMode.ipa`
+3. Generates a complete `Info.plist` with all Sideloadly-required metadata
+4. Creates `PkgInfo` file (`APPL????`)
+5. Ad-hoc code signs the `.app` bundle
+6. Packages into `~/Desktop/ShowMode.ipa`
+7. Validates the IPA structure before reporting success
 
 Build log: `/tmp/ShowMode-build.log`
 
@@ -57,6 +60,26 @@ ShowMode/
 - `/tmp/ShowModeSwift/LaunchScreen.storyboardc` — Compiled storyboard for full-screen display
 - Xcode 14.3.1 at `/Applications/Xcode-14.3.1.app/`
 - Sideloadly for installation
+
+## IPA Requirements for Sideloadly
+
+Sideloadly expects a properly structured IPA. The `.app` bundle must contain:
+
+| File | Purpose |
+|------|---------|
+| `ShowMode` (executable) | The arm64 Mach-O binary |
+| `Info.plist` | Must include `MinimumOSVersion`, `DTPlatformName`, `CFBundleSupportedPlatforms`, `DTSDKName` |
+| `PkgInfo` | Contains `APPL????` — standard iOS app marker |
+| `_CodeSignature/CodeResources` | Ad-hoc signature (Sideloadly re-signs with your Apple ID) |
+
+**Key Info.plist fields** (beyond the standard CF keys):
+- `MinimumOSVersion` — deployment target (11.0)
+- `DTPlatformName` — must be `iphoneos`
+- `DTPlatformVersion` / `DTSDKName` — SDK version (16.4)
+- `CFBundleSupportedPlatforms` — must contain `iPhoneOS`
+- `UIDeviceFamily` — must contain `2` (iPad)
+
+The build script validates all of these before reporting success. If validation fails, check the log at `/tmp/ShowMode-build.log`.
 
 ## Constraints
 

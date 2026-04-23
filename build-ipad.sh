@@ -72,6 +72,8 @@ cat > "$PLIST" <<EOF
     <string>${MARKETING_VERSION}</string>
     <key>CFBundleVersion</key>
     <string>${CURRENT_PROJECT_VERSION}</string>
+    <key>MinimumOSVersion</key>
+    <string>11.0</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIStatusBarHidden</key>
@@ -88,6 +90,18 @@ cat > "$PLIST" <<EOF
     <array>
         <integer>2</integer>
     </array>
+    <key>DTPlatformName</key>
+    <string>iphoneos</string>
+    <key>DTPlatformVersion</key>
+    <string>16.4</string>
+    <key>DTSDKName</key>
+    <string>iphoneos16.4</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>iPhoneOS</string>
+    </array>
+    <key>BuildMachineOSBuild</key>
+    <string>22A400</string>
 </dict>
 </plist>
 EOF
@@ -109,29 +123,77 @@ echo "Compilation successful"
 
 # Package IPA
 echo "Packaging IPA..."
+APP_DIR="$BUILD_DIR/Payload/ShowMode.app"
 rm -rf "$BUILD_DIR/Payload"
-mkdir -p "$BUILD_DIR/Payload/ShowMode.app"
-cp "$BUILD_DIR/ShowMode" "$BUILD_DIR/Payload/ShowMode.app/ShowMode"
+mkdir -p "$APP_DIR"
+cp "$BUILD_DIR/ShowMode" "$APP_DIR/ShowMode"
 
 # Copy Info.plist
 if [ -f "$PLIST" ]; then
-    cp "$PLIST" "$BUILD_DIR/Payload/ShowMode.app/Info.plist"
+    cp "$PLIST" "$APP_DIR/Info.plist"
 else
     echo "ERROR: Info.plist not found at $PLIST"
     exit 1
 fi
 
+# Create PkgInfo (standard for iOS apps)
+printf 'APPL????' > "$APP_DIR/PkgInfo"
+
 # Copy LaunchScreen
 if [ -d "$BUILD_DIR/LaunchScreen.storyboardc" ]; then
-    cp -R "$BUILD_DIR/LaunchScreen.storyboardc" "$BUILD_DIR/Payload/ShowMode.app/LaunchScreen.storyboardc"
+    cp -R "$BUILD_DIR/LaunchScreen.storyboardc" "$APP_DIR/LaunchScreen.storyboardc"
+fi
+
+# Ad-hoc code sign so the IPA has valid structure for Sideloadly
+CODESIGN="/usr/bin/codesign"
+if [ -x "$CODESIGN" ]; then
+    echo "Ad-hoc signing .app bundle..."
+    "$CODESIGN" --force --sign - --timestamp=none "$APP_DIR"
 fi
 
 rm -f "$IPA_PATH"
 cd "$BUILD_DIR"
 zip -r "$IPA_PATH" Payload -q
 
+# Validate IPA structure (catch problems before attempting Sideloadly)
+echo "Validating IPA..."
+VALID=true
+
+# Check zip is well-formed
+if ! unzip -t "$IPA_PATH" > /dev/null 2>&1; then
+    echo "ERROR: IPA is not a valid zip archive"
+    VALID=false
+fi
+
+# Check required files exist inside the IPA
+for REQUIRED in "Payload/ShowMode.app/ShowMode" "Payload/ShowMode.app/Info.plist" "Payload/ShowMode.app/PkgInfo" "Payload/ShowMode.app/_CodeSignature/CodeResources"; do
+    if ! unzip -l "$IPA_PATH" "$REQUIRED" > /dev/null 2>&1; then
+        echo "ERROR: Missing $REQUIRED in IPA"
+        VALID=false
+    fi
+done
+
+# Verify code signature on the .app inside the build dir
+if ! codesign -v "$APP_DIR" 2>/dev/null; then
+    echo "ERROR: Code signature verification failed"
+    VALID=false
+fi
+
+# Check key Info.plist fields
+for KEY in MinimumOSVersion CFBundleIdentifier CFBundleExecutable CFBundleSupportedPlatforms DTPlatformName; do
+    if ! /usr/libexec/PlistBuddy -c "Print :$KEY" "$APP_DIR/Info.plist" > /dev/null 2>&1; then
+        echo "ERROR: Info.plist missing required key: $KEY"
+        VALID=false
+    fi
+done
+
+if [ "$VALID" = false ]; then
+    echo "=== BUILD FAILED: IPA validation errors (see above) ==="
+    exit 1
+fi
+
 echo "=== Build complete ==="
-echo "IPA: $IPA_PATH"
+echo "IPA: $IPA_PATH ($(du -h "$IPA_PATH" | cut -f1) bytes)"
 echo "Bundle ID: $BUNDLE_ID"
 echo "Install with Sideloadly"
 echo "Log: $LOG_PATH"
