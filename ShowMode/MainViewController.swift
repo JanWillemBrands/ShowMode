@@ -65,14 +65,14 @@ class MainViewController: UIViewController {
 
     private let weatherIconLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 64)
+        label.font = UIFont.systemFont(ofSize: 72)
         label.textAlignment = .center
         return label
     }()
 
     private let weatherTempLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 40, weight: .light)
+        label.font = UIFont.systemFont(ofSize: 48, weight: .light)
         label.textColor = .white
         label.layer.shadowColor = UIColor.black.cgColor
         label.layer.shadowOffset = CGSize(width: 0, height: 1)
@@ -83,8 +83,8 @@ class MainViewController: UIViewController {
 
     private let weatherDetailLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 15, weight: .light)
-        label.textColor = UIColor.white.withAlphaComponent(0.7)
+        label.font = UIFont.systemFont(ofSize: 18, weight: .light)
+        label.textColor = .white
         label.numberOfLines = 2
         label.layer.shadowColor = UIColor.black.cgColor
         label.layer.shadowOffset = CGSize(width: 0, height: 1)
@@ -95,8 +95,8 @@ class MainViewController: UIViewController {
 
     private let weatherLocationLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14, weight: .light)
-        label.textColor = UIColor.white.withAlphaComponent(0.5)
+        label.font = UIFont.systemFont(ofSize: 16, weight: .light)
+        label.textColor = .white
         label.textAlignment = .right
         label.text = "Padua, Italy"
         label.layer.shadowColor = UIColor.black.cgColor
@@ -278,9 +278,9 @@ class MainViewController: UIViewController {
             topRow.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
             topRow.topAnchor.constraint(equalTo: topAnchor, constant: 30),
 
-            // Forecast right-aligned with weather
-            forecastStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
-            forecastStack.topAnchor.constraint(equalTo: topRow.bottomAnchor, constant: 18),
+            // Forecast centred horizontally
+            forecastStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            forecastStack.topAnchor.constraint(equalTo: topRow.bottomAnchor, constant: 30),
 
             // Spacer 1: between forecast and events
             spacer1.topAnchor.constraint(equalTo: forecastStack.bottomAnchor),
@@ -466,8 +466,8 @@ class MainViewController: UIViewController {
         for day in forecasts {
             let dayLabel = UILabel()
             dayLabel.text = day.dayName
-            dayLabel.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-            dayLabel.textColor = UIColor.white.withAlphaComponent(0.6)
+            dayLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+            dayLabel.textColor = .white
             dayLabel.textAlignment = .center
             dayLabel.layer.shadowColor = UIColor.black.cgColor
             dayLabel.layer.shadowOffset = CGSize(width: 0, height: 1)
@@ -476,13 +476,13 @@ class MainViewController: UIViewController {
 
             let iconLabel = UILabel()
             iconLabel.text = day.icon
-            iconLabel.font = UIFont.systemFont(ofSize: 36)
+            iconLabel.font = UIFont.systemFont(ofSize: 48)
             iconLabel.textAlignment = .center
 
             let tempLabel = UILabel()
             tempLabel.text = "\(day.high)\u{00B0}/\(day.low)\u{00B0}"
-            tempLabel.font = UIFont.systemFont(ofSize: 13, weight: .light)
-            tempLabel.textColor = UIColor.white.withAlphaComponent(0.7)
+            tempLabel.font = UIFont.systemFont(ofSize: 17, weight: .light)
+            tempLabel.textColor = .white
             tempLabel.textAlignment = .center
             tempLabel.layer.shadowColor = UIColor.black.cgColor
             tempLabel.layer.shadowOffset = CGSize(width: 0, height: 1)
@@ -493,7 +493,7 @@ class MainViewController: UIViewController {
             col.axis = .vertical
             col.spacing = 2
             col.alignment = .center
-            col.widthAnchor.constraint(greaterThanOrEqualToConstant: 56).isActive = true
+            col.widthAnchor.constraint(greaterThanOrEqualToConstant: 72).isActive = true
 
             forecastStack.addArrangedSubview(col)
         }
@@ -645,7 +645,7 @@ class NewsCardCell: UICollectionViewCell {
 
     private let headlineLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 15, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
         label.textColor = .white
         label.numberOfLines = 2
         return label
@@ -653,7 +653,7 @@ class NewsCardCell: UICollectionViewCell {
 
     private let dateLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         label.textColor = UIColor.white.withAlphaComponent(0.6)
         label.numberOfLines = 2
         return label
