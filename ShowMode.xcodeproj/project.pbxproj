@@ -7,10 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4ECD587C2F9A175A00317F71 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58722F9A175A00317F71 /* index.html */; };
+		4ECD587D2F9A175A00317F71 /* scrape_barcoteatro.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58762F9A175A00317F71 /* scrape_barcoteatro.py */; };
+		4ECD587E2F9A175A00317F71 /* events.rss in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58712F9A175A00317F71 /* events.rss */; };
+		4ECD587F2F9A175A00317F71 /* scrape_bru_zane.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58772F9A175A00317F71 /* scrape_bru_zane.py */; };
+		4ECD58802F9A175A00317F71 /* BUILD.md in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD586B2F9A175A00317F71 /* BUILD.md */; };
+		4ECD58812F9A175A00317F71 /* Padova-Stemma.svg in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD586D2F9A175A00317F71 /* Padova-Stemma.svg */; };
+		4ECD58822F9A175A00317F71 /* generate_feed.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58742F9A175A00317F71 /* generate_feed.py */; };
+		4ECD58832F9A175A00317F71 /* build-ipad.sh in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD586C2F9A175A00317F71 /* build-ipad.sh */; };
+		4ECD58842F9A175A00317F71 /* scrape_la_fenice.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58782F9A175A00317F71 /* scrape_la_fenice.py */; };
+		4ECD58852F9A175A00317F71 /* requirements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58752F9A175A00317F71 /* requirements.txt */; };
+		4ECD58862F9A175A00317F71 /* scrape_pollini.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD587A2F9A175A00317F71 /* scrape_pollini.py */; };
+		4ECD58872F9A175A00317F71 /* scrape_opv.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58792F9A175A00317F71 /* scrape_opv.py */; };
+		4ECD58882F9A175A00317F71 /* scrape.yml in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD586E2F9A175A00317F71 /* scrape.yml */; };
 		4EF4F3ED2F8B57FA005F0E90 /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = 4EF4F3EC2F8B57EF005F0E90 /* CLAUDE.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4ECD586B2F9A175A00317F71 /* BUILD.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = BUILD.md; sourceTree = "<group>"; };
+		4ECD586C2F9A175A00317F71 /* build-ipad.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "build-ipad.sh"; sourceTree = "<group>"; };
+		4ECD586D2F9A175A00317F71 /* Padova-Stemma.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Padova-Stemma.svg"; sourceTree = "<group>"; };
+		4ECD586E2F9A175A00317F71 /* scrape.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = scrape.yml; sourceTree = "<group>"; };
+		4ECD58712F9A175A00317F71 /* events.rss */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = events.rss; sourceTree = "<group>"; };
+		4ECD58722F9A175A00317F71 /* index.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		4ECD58742F9A175A00317F71 /* generate_feed.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = generate_feed.py; sourceTree = "<group>"; };
+		4ECD58752F9A175A00317F71 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
+		4ECD58762F9A175A00317F71 /* scrape_barcoteatro.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_barcoteatro.py; sourceTree = "<group>"; };
+		4ECD58772F9A175A00317F71 /* scrape_bru_zane.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_bru_zane.py; sourceTree = "<group>"; };
+		4ECD58782F9A175A00317F71 /* scrape_la_fenice.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_la_fenice.py; sourceTree = "<group>"; };
+		4ECD58792F9A175A00317F71 /* scrape_opv.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_opv.py; sourceTree = "<group>"; };
+		4ECD587A2F9A175A00317F71 /* scrape_pollini.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_pollini.py; sourceTree = "<group>"; };
 		4EF4F3D82F8B42BD005F0E90 /* ShowMode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShowMode.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4EF4F3EC2F8B57EF005F0E90 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -34,12 +60,57 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4ECD586F2F9A175A00317F71 /* workflows */ = {
+			isa = PBXGroup;
+			children = (
+				4ECD586E2F9A175A00317F71 /* scrape.yml */,
+			);
+			path = workflows;
+			sourceTree = "<group>";
+		};
+		4ECD58702F9A175A00317F71 /* .github */ = {
+			isa = PBXGroup;
+			children = (
+				4ECD586F2F9A175A00317F71 /* workflows */,
+			);
+			path = .github;
+			sourceTree = "<group>";
+		};
+		4ECD58732F9A175A00317F71 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				4ECD58712F9A175A00317F71 /* events.rss */,
+				4ECD58722F9A175A00317F71 /* index.html */,
+			);
+			path = docs;
+			sourceTree = "<group>";
+		};
+		4ECD587B2F9A175A00317F71 /* veneto-events */ = {
+			isa = PBXGroup;
+			children = (
+				4ECD58702F9A175A00317F71 /* .github */,
+				4ECD58732F9A175A00317F71 /* docs */,
+				4ECD58742F9A175A00317F71 /* generate_feed.py */,
+				4ECD58752F9A175A00317F71 /* requirements.txt */,
+				4ECD58762F9A175A00317F71 /* scrape_barcoteatro.py */,
+				4ECD58772F9A175A00317F71 /* scrape_bru_zane.py */,
+				4ECD58782F9A175A00317F71 /* scrape_la_fenice.py */,
+				4ECD58792F9A175A00317F71 /* scrape_opv.py */,
+				4ECD587A2F9A175A00317F71 /* scrape_pollini.py */,
+			);
+			path = "veneto-events";
+			sourceTree = "<group>";
+		};
 		4EF4F3CF2F8B42BD005F0E90 = {
 			isa = PBXGroup;
 			children = (
 				4EF4F3EC2F8B57EF005F0E90 /* CLAUDE.md */,
 				4EF4F3DA2F8B42BD005F0E90 /* ShowMode */,
 				4EF4F3D92F8B42BD005F0E90 /* Products */,
+				4ECD586B2F9A175A00317F71 /* BUILD.md */,
+				4ECD586C2F9A175A00317F71 /* build-ipad.sh */,
+				4ECD586D2F9A175A00317F71 /* Padova-Stemma.svg */,
+				4ECD587B2F9A175A00317F71 /* veneto-events */,
 			);
 			sourceTree = "<group>";
 		};
@@ -115,6 +186,19 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4ECD587C2F9A175A00317F71 /* index.html in Resources */,
+				4ECD587D2F9A175A00317F71 /* scrape_barcoteatro.py in Resources */,
+				4ECD587E2F9A175A00317F71 /* events.rss in Resources */,
+				4ECD587F2F9A175A00317F71 /* scrape_bru_zane.py in Resources */,
+				4ECD58802F9A175A00317F71 /* BUILD.md in Resources */,
+				4ECD58812F9A175A00317F71 /* Padova-Stemma.svg in Resources */,
+				4ECD58822F9A175A00317F71 /* generate_feed.py in Resources */,
+				4ECD58832F9A175A00317F71 /* build-ipad.sh in Resources */,
+				4ECD58842F9A175A00317F71 /* scrape_la_fenice.py in Resources */,
+				4ECD58852F9A175A00317F71 /* requirements.txt in Resources */,
+				4ECD58862F9A175A00317F71 /* scrape_pollini.py in Resources */,
+				4ECD58872F9A175A00317F71 /* scrape_opv.py in Resources */,
+				4ECD58882F9A175A00317F71 /* scrape.yml in Resources */,
 				4EF4F3ED2F8B57FA005F0E90 /* CLAUDE.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
