@@ -3,14 +3,22 @@
 # Compiles Swift sources with Xcode 14.3.1 CLI tools and packages as IPA
 #
 # Usage: ./build-ipad.sh
-# Output: ~/Desktop/ShowMode.ipa (install via Sideloadly)
+# Output: ~/Desktop/ShowMode.ipa
+# Log: /tmp/ShowMode-build.log
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SRC_DIR="$SCRIPT_DIR/ShowMode"
 BUILD_DIR="/tmp/ShowModeSwift"
 IPA_PATH="$HOME/Desktop/ShowMode.ipa"
+LOG_PATH="/tmp/ShowMode-build.log"
+
+BUNDLE_ID="${SHOWMODE_BUNDLE_ID:-Magenta.ShowModeLegacy}"
+PRODUCT_NAME="ShowMode"
+EXECUTABLE_NAME="ShowMode"
+MARKETING_VERSION="${SHOWMODE_MARKETING_VERSION:-1.0}"
+CURRENT_PROJECT_VERSION="${SHOWMODE_CURRENT_PROJECT_VERSION:-1}"
 
 SWIFTC="/Applications/Xcode-14.3.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
 SDK="/Applications/Xcode-14.3.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk"
@@ -23,11 +31,12 @@ if [ ! -f "$SWIFTC" ]; then
     exit 1
 fi
 
+mkdir -p "$BUILD_DIR"
+exec > >(tee "$LOG_PATH") 2>&1
+
 echo "=== ShowMode iPad Build ==="
 echo "Source: $SRC_DIR"
-
-# Ensure build directory
-mkdir -p "$BUILD_DIR"
+echo "Log: $LOG_PATH"
 
 # Compile LaunchScreen if needed
 if [ ! -d "$BUILD_DIR/LaunchScreen.storyboardc" ]; then
@@ -40,6 +49,48 @@ if [ ! -d "$BUILD_DIR/LaunchScreen.storyboardc" ]; then
         echo "WARNING: LaunchScreen.storyboard not found in $BUILD_DIR, skipping"
     fi
 fi
+
+# Generate a concrete Info.plist for legacy packaging.
+cat > "$PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>${EXECUTABLE_NAME}</string>
+    <key>CFBundleIdentifier</key>
+    <string>${BUNDLE_ID}</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>${PRODUCT_NAME}</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>${MARKETING_VERSION}</string>
+    <key>CFBundleVersion</key>
+    <string>${CURRENT_PROJECT_VERSION}</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UIStatusBarHidden</key>
+    <true/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>2</integer>
+    </array>
+</dict>
+</plist>
+EOF
 
 # Compile Swift sources
 echo "Compiling Swift for arm64-apple-ios11.0..."
@@ -81,4 +132,6 @@ zip -r "$IPA_PATH" Payload -q
 
 echo "=== Build complete ==="
 echo "IPA: $IPA_PATH"
+echo "Bundle ID: $BUNDLE_ID"
 echo "Install with Sideloadly"
+echo "Log: $LOG_PATH"
