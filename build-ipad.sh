@@ -117,6 +117,7 @@ echo "Compiling Swift for arm64-apple-ios11.0..."
     -o "$BUILD_DIR/ShowMode" \
     "$SRC_DIR/AppDelegate.swift" \
     "$SRC_DIR/RSSParser.swift" \
+    "$SRC_DIR/LaFeniceScraper.swift" \
     "$SRC_DIR/MainViewController.swift"
 
 echo "Compilation successful"

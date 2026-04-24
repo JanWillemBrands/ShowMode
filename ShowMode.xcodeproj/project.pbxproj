@@ -15,7 +15,6 @@
 		4ECD58812F9A175A00317F71 /* Padova-Stemma.svg in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD586D2F9A175A00317F71 /* Padova-Stemma.svg */; };
 		4ECD58822F9A175A00317F71 /* generate_feed.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58742F9A175A00317F71 /* generate_feed.py */; };
 		4ECD58832F9A175A00317F71 /* build-ipad.sh in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD586C2F9A175A00317F71 /* build-ipad.sh */; };
-		4ECD58842F9A175A00317F71 /* scrape_la_fenice.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58782F9A175A00317F71 /* scrape_la_fenice.py */; };
 		4ECD58852F9A175A00317F71 /* requirements.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58752F9A175A00317F71 /* requirements.txt */; };
 		4ECD58862F9A175A00317F71 /* scrape_pollini.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD587A2F9A175A00317F71 /* scrape_pollini.py */; };
 		4ECD58872F9A175A00317F71 /* scrape_opv.py in Resources */ = {isa = PBXBuildFile; fileRef = 4ECD58792F9A175A00317F71 /* scrape_opv.py */; };
@@ -34,7 +33,6 @@
 		4ECD58752F9A175A00317F71 /* requirements.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = requirements.txt; sourceTree = "<group>"; };
 		4ECD58762F9A175A00317F71 /* scrape_barcoteatro.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_barcoteatro.py; sourceTree = "<group>"; };
 		4ECD58772F9A175A00317F71 /* scrape_bru_zane.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_bru_zane.py; sourceTree = "<group>"; };
-		4ECD58782F9A175A00317F71 /* scrape_la_fenice.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_la_fenice.py; sourceTree = "<group>"; };
 		4ECD58792F9A175A00317F71 /* scrape_opv.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_opv.py; sourceTree = "<group>"; };
 		4ECD587A2F9A175A00317F71 /* scrape_pollini.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scrape_pollini.py; sourceTree = "<group>"; };
 		4EF4F3D82F8B42BD005F0E90 /* ShowMode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ShowMode.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,7 +92,6 @@
 				4ECD58752F9A175A00317F71 /* requirements.txt */,
 				4ECD58762F9A175A00317F71 /* scrape_barcoteatro.py */,
 				4ECD58772F9A175A00317F71 /* scrape_bru_zane.py */,
-				4ECD58782F9A175A00317F71 /* scrape_la_fenice.py */,
 				4ECD58792F9A175A00317F71 /* scrape_opv.py */,
 				4ECD587A2F9A175A00317F71 /* scrape_pollini.py */,
 			);
@@ -194,7 +191,6 @@
 				4ECD58812F9A175A00317F71 /* Padova-Stemma.svg in Resources */,
 				4ECD58822F9A175A00317F71 /* generate_feed.py in Resources */,
 				4ECD58832F9A175A00317F71 /* build-ipad.sh in Resources */,
-				4ECD58842F9A175A00317F71 /* scrape_la_fenice.py in Resources */,
 				4ECD58852F9A175A00317F71 /* requirements.txt in Resources */,
 				4ECD58862F9A175A00317F71 /* scrape_pollini.py in Resources */,
 				4ECD58872F9A175A00317F71 /* scrape_opv.py in Resources */,
