@@ -12,9 +12,39 @@ class LaFeniceScraper {
 
     private var lastUploadedContent: Data?
 
+    private struct RawEvent {
+        let title: String
+        let date: Date
+        let url: String?
+        let venue: String
+        let category: String
+        let image: String?
+    }
+
     private let isoFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
+        df.timeZone = TimeZone(identifier: "Europe/Rome")
+        return df
+    }()
+
+    private let monthFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateFormat = "MMM"
+        df.timeZone = TimeZone(identifier: "Europe/Rome")
+        return df
+    }()
+
+    private let dayFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateFormat = "d"
+        df.timeZone = TimeZone(identifier: "Europe/Rome")
+        return df
+    }()
+
+    private let singleDateFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateFormat = "d MMM"
         df.timeZone = TimeZone(identifier: "Europe/Rome")
         return df
     }()
@@ -34,7 +64,8 @@ class LaFeniceScraper {
                 completion([])
                 return
             }
-            let (items, rawEvents) = self.parseHTML(html)
+            let rawEvents = self.parseHTML(html)
+            let items = self.combineEvents(rawEvents)
             if !rawEvents.isEmpty {
                 self.uploadToGitHub(rawEvents)
             }
@@ -44,9 +75,8 @@ class LaFeniceScraper {
 
     // MARK: - HTML Parsing
 
-    private func parseHTML(_ html: String) -> ([RSSItem], [[String: String]]) {
-        var items: [RSSItem] = []
-        var rawEvents: [[String: String]] = []
+    private func parseHTML(_ html: String) -> [RawEvent] {
+        var rawEvents: [RawEvent] = []
         let today = Date()
         let calendar = Calendar.current
 
@@ -67,19 +97,16 @@ class LaFeniceScraper {
             let nextRowRange = html.range(of: "data-list-id=\"", range: searchStart..<html.endIndex)
             let blockEnd = nextRowRange?.lowerBound ?? html.endIndex
             let block = String(html[searchStart..<blockEnd])
-            let (blockItems, blockRaw) = parseEventBlock(block, rowDate: rowDate)
-            items.append(contentsOf: blockItems)
-            rawEvents.append(contentsOf: blockRaw)
+            rawEvents.append(contentsOf: parseEventBlock(block, rowDate: rowDate))
 
             if nextRowRange == nil { break }
         }
 
-        return (items, rawEvents)
+        return rawEvents
     }
 
-    private func parseEventBlock(_ block: String, rowDate: Date) -> ([RSSItem], [[String: String]]) {
-        var items: [RSSItem] = []
-        var rawEvents: [[String: String]] = []
+    private func parseEventBlock(_ block: String, rowDate: Date) -> [RawEvent] {
+        var events: [RawEvent] = []
         let marker = "sn_calendar_block_list_row_group_i"
 
         var searchStart = block.startIndex
@@ -98,39 +125,91 @@ class LaFeniceScraper {
             let link = extractHref(eventHTML)
             let image = extractImgSrc(eventHTML)
 
-            let venueName = venue.isEmpty ? "La Fenice" : venue
-            let datePart = formatDate(rowDate)
-            let categoryPart = category.isEmpty ? "" : category + " \u{2014} "
-            let desc = "\(venueName) \u{2022} \(datePart)\n\(categoryPart)La Fenice"
-
-            items.append(RSSItem(
+            events.append(RawEvent(
                 title: title,
-                description: desc,
-                thumbnailURL: image,
-                link: link
+                date: rowDate,
+                url: link,
+                venue: venue.isEmpty ? "La Fenice" : venue,
+                category: category,
+                image: image
             ))
-
-            rawEvents.append([
-                "title": title,
-                "start": isoFormatter.string(from: rowDate),
-                "url": link ?? "",
-                "venue": venueName,
-                "type": category,
-                "source": "La Fenice",
-                "image": image ?? "",
-            ])
         }
 
-        return (items, rawEvents)
+        return events
+    }
+
+    // MARK: - Combine Events
+
+    private func combineEvents(_ events: [RawEvent]) -> [RSSItem] {
+        var grouped: [(String, [RawEvent])] = []
+        var urlIndex: [String: Int] = [:]
+
+        for event in events {
+            let key = event.url ?? event.title
+            if let idx = urlIndex[key] {
+                grouped[idx].1.append(event)
+            } else {
+                urlIndex[key] = grouped.count
+                grouped.append((key, [event]))
+            }
+        }
+
+        return grouped.map { (_, events) in
+            let first = events[0]
+            let dates = events.map { $0.date }.sorted()
+            let dateStr = formatDates(dates)
+            let categoryPart = first.category.isEmpty ? "" : first.category + " \u{2014} "
+            let desc = "\(first.venue) \u{2022} \(dateStr)\n\(categoryPart)La Fenice"
+
+            return RSSItem(
+                title: first.title,
+                description: desc,
+                thumbnailURL: first.image,
+                link: first.url
+            )
+        }
+    }
+
+    private func formatDates(_ dates: [Date]) -> String {
+        if dates.count == 1 {
+            return singleDateFormatter.string(from: dates[0])
+        }
+
+        var months: [(String, [String])] = []
+        var monthIndex: [String: Int] = [:]
+
+        for date in dates {
+            let month = monthFormatter.string(from: date)
+            let day = dayFormatter.string(from: date)
+            if let idx = monthIndex[month] {
+                months[idx].1.append(day)
+            } else {
+                monthIndex[month] = months.count
+                months.append((month, [day]))
+            }
+        }
+
+        return months.map { "\($0.0): \($0.1.joined(separator: ", "))" }
+            .joined(separator: " | ")
     }
 
     // MARK: - GitHub Upload
 
-    private func uploadToGitHub(_ events: [[String: String]]) {
+    private func uploadToGitHub(_ events: [RawEvent]) {
         guard let token = Bundle.main.infoDictionary?["GitHubToken"] as? String,
               !token.isEmpty else { return }
 
-        let payload: [String: Any] = ["events": events]
+        let eventDicts: [[String: String]] = events.map { [
+            "title": $0.title,
+            "start": isoFormatter.string(from: $0.date),
+            "url": $0.url ?? "",
+            "venue": $0.venue,
+            "type": $0.category,
+            "source": "La Fenice",
+            "image": $0.image ?? "",
+        ] }
+
+        let payload: [String: Any] = ["events": eventDicts]
         guard let jsonData = try? JSONSerialization.data(
             withJSONObject: payload,
             options: [.sortedKeys, .prettyPrinted]
@@ -186,13 +265,6 @@ class LaFeniceScraper {
     }
 
     // MARK: - HTML Helpers
-
-    private func formatDate(_ date: Date) -> String {
-        let df = DateFormatter()
-        df.dateFormat = "dd MMM"
-        df.timeZone = TimeZone(identifier: "Europe/Rome")
-        return df.string(from: date)
-    }
 
     private func extractTagContent(_ html: String, className: String) -> String {
         guard let classRange = html.range(of: "class=\"\(className)\"") else { return "" }
