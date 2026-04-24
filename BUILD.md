@@ -46,12 +46,13 @@ Build log: `/tmp/ShowMode-build.log`
 ```
 ShowMode/
   ShowMode/
-    AppDelegate.swift       # Window setup, portrait lock
-    MainViewController.swift # All UI: clock, weather, news, entertainment
-    RSSParser.swift          # XML parser for RSS feeds (BBC, Repubblica)
-  build-ipad.sh             # iPad compilation + IPA packaging
-  ShowMode.xcodeproj/       # Xcode 26.4 (development)
-  ShowModeLegacy.xcodeproj/ # Legacy project (no longer needed)
+    AppDelegate.swift        # Window setup, portrait lock
+    MainViewController.swift # All UI: clock, weather, events display
+    RSSParser.swift          # XML parser for RSS feeds
+    LaFeniceScraper.swift    # On-device HTML scraper for La Fenice
+  build-ipad.sh              # iPad compilation + IPA packaging
+  ShowMode.xcodeproj/        # Xcode 26.4 (development)
+  veneto-events/             # Separate repo: Python scrapers + GitHub Actions
 ```
 
 ## Build Dependencies

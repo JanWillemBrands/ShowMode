@@ -9,12 +9,13 @@ import os
 import sys
 import time
 import traceback
+import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 import feedgenerator
 
 from scrape_bru_zane import scrape as scrape_bru_zane
-from scrape_la_fenice import scrape as scrape_la_fenice
 from scrape_barcoteatro import scrape as scrape_barcoteatro
 from scrape_opv import scrape as scrape_opv
 from scrape_pollini import scrape as scrape_pollini
@@ -22,9 +23,9 @@ from scrape_pollini import scrape as scrape_pollini
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs")
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, "events.rss")
 
+# La Fenice is scraped directly by the iPad app (Cloudflare blocks GitHub IPs)
 SCRAPERS = [
     ("Bru Zane", scrape_bru_zane),
-    ("La Fenice", scrape_la_fenice),
     ("Barco Teatro", scrape_barcoteatro),
     ("OPV", scrape_opv),
     ("Pollini", scrape_pollini),
@@ -45,6 +46,50 @@ def format_dates_by_month(dates):
     for month, days in by_month.items():
         parts.append(f"{month}: {', '.join(days)}")
     return " | ".join(parts)
+
+
+SOURCE_NAMES = [name for name, _ in SCRAPERS] + ["La Fenice"]
+
+
+def load_existing_items_for_sources(sources):
+    """Read the existing RSS feed and return items whose source is in the given set."""
+    if not os.path.exists(OUTPUT_FILE) or not sources:
+        return []
+    try:
+        tree = ET.parse(OUTPUT_FILE)
+        items = []
+        for item_el in tree.findall(".//item"):
+            desc = (item_el.findtext("description") or "")
+            source = None
+            for s in SOURCE_NAMES:
+                if s in desc:
+                    source = s
+                    break
+            if source not in sources:
+                continue
+            pub_str = item_el.findtext("pubDate") or ""
+            try:
+                pub_dt = parsedate_to_datetime(pub_str)
+            except Exception:
+                continue
+            if pub_dt.replace(tzinfo=None) < datetime.now():
+                continue
+            enc_el = item_el.find("enclosure")
+            image = enc_el.get("url", "") if enc_el is not None else ""
+            items.append({
+                "title": item_el.findtext("title") or "",
+                "start": pub_dt.replace(tzinfo=None).isoformat(),
+                "url": item_el.findtext("link") or "",
+                "description_raw": desc,
+                "image": image,
+                "source": source,
+                "_preserved": True,
+            })
+        print(f"  Preserved {len(items)} items from existing feed for: {', '.join(sources)}")
+        return items
+    except Exception as e:
+        print(f"  WARNING: Could not read existing feed: {e}")
+        return []
 
 
 def combine_events(events):
@@ -71,6 +116,23 @@ def combine_events(events):
     return combined
 
 
+EXCLUDE_KEYWORDS = [
+    "seminario", "masterclass", "workshop", "convegno", "lezione",
+    "conferenza", "musicoterapia", "degustazione", "tavola rotonda",
+]
+
+
+def is_excluded(event):
+    title = event.get("title", "").lower()
+    etype = event.get("type", "").lower()
+    for kw in EXCLUDE_KEYWORDS:
+        if kw in title or kw in etype:
+            return True
+    if etype == "altro":
+        return True
+    return False
+
+
 def main():
     all_events = []
     errors = []
@@ -80,7 +142,13 @@ def main():
             try:
                 print(f"Scraping {name}..." if attempt == 1 else f"  Retry {name}...")
                 events = scraper()
-                print(f"  Found {len(events)} events")
+                before = len(events)
+                events = [e for e in events if not is_excluded(e)]
+                excluded = before - len(events)
+                if excluded:
+                    print(f"  Found {before} events, excluded {excluded} (talks/workshops)")
+                else:
+                    print(f"  Found {len(events)} events")
                 all_events.extend(events)
                 break
             except Exception as e:
@@ -91,10 +159,27 @@ def main():
                     traceback.print_exc()
                     errors.append(name)
 
+    # Preserve events from failed scrapers and sources not covered by any scraper
+    # (e.g. La Fenice, which is scraped by the iPad app and pushed manually)
+    scraped_sources = set(name for name, _ in SCRAPERS) - set(errors)
+    preserve_sources = set(errors)
+    if os.path.exists(OUTPUT_FILE):
+        try:
+            tree = ET.parse(OUTPUT_FILE)
+            for item_el in tree.findall(".//item"):
+                desc = (item_el.findtext("description") or "")
+                for s in SOURCE_NAMES:
+                    if s in desc and s not in scraped_sources:
+                        preserve_sources.add(s)
+                        break
+        except Exception:
+            pass
+    if preserve_sources:
+        preserved = load_existing_items_for_sources(preserve_sources)
+        all_events.extend(preserved)
+
     if not all_events:
         print("WARNING: No events found from any source.")
-        if errors:
-            print(f"Failed scrapers: {', '.join(errors)}")
         if os.path.exists(OUTPUT_FILE):
             print(f"Keeping existing feed at {OUTPUT_FILE}")
             return 0
@@ -106,9 +191,9 @@ def main():
     combined = combine_events(all_events)
     print(f"Total: {len(all_events)} showings -> {len(combined)} unique events")
     if errors:
-        print(f"Failed scrapers: {', '.join(errors)}")
+        print(f"Failed scrapers (using cached data): {', '.join(errors)}")
 
-    sources = [name for name, _ in SCRAPERS if name not in errors]
+    sources = SOURCE_NAMES
     feed = feedgenerator.Rss201rev2Feed(
         title="Veneto Events",
         link="https://janwillembrands.github.io/veneto-events/",
@@ -118,16 +203,17 @@ def main():
     )
 
     for ev in combined:
-        # Description line 1: venue + dates (shown on the card)
-        venue = ev.get("venue", "")
-        desc_line1 = f"{venue} \u2022 {ev['dates_display']}" if venue else ev["dates_display"]
-        # Description line 2: type — source
-        meta = []
-        if ev.get("type"):
-            meta.append(ev["type"])
-        meta.append(ev.get("source", ""))
-        desc_line2 = " \u2014 ".join(p for p in meta if p)
-        description = f"{desc_line1}\n{desc_line2}"
+        if ev.get("_preserved"):
+            description = ev["description_raw"]
+        else:
+            venue = ev.get("venue", "")
+            desc_line1 = f"{venue} \u2022 {ev['dates_display']}" if venue else ev["dates_display"]
+            meta = []
+            if ev.get("type"):
+                meta.append(ev["type"])
+            meta.append(ev.get("source", ""))
+            desc_line2 = " \u2014 ".join(p for p in meta if p)
+            description = f"{desc_line1}\n{desc_line2}"
 
         enclosures = []
         if ev.get("image"):
