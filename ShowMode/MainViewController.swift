@@ -319,10 +319,10 @@ class MainViewController: UIViewController {
         clockTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.updateClock()
         }
-        weatherTimer = Timer.scheduledTimer(withTimeInterval: 600, repeats: true) { [weak self] _ in
+        weatherTimer = Timer.scheduledTimer(withTimeInterval: 60*10, repeats: true) { [weak self] _ in
             self?.fetchWeather()
         }
-        newsTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+        newsTimer = Timer.scheduledTimer(withTimeInterval: 60*60, repeats: true) { [weak self] _ in
             self?.fetchNews()
         }
         photoTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { [weak self] _ in

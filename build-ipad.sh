@@ -9,6 +9,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+[ -f "$SCRIPT_DIR/.env" ] && source "$SCRIPT_DIR/.env"
 SRC_DIR="$SCRIPT_DIR/ShowMode"
 BUILD_DIR="/tmp/ShowModeSwift"
 IPA_PATH="$HOME/Desktop/ShowMode.ipa"
@@ -19,6 +20,7 @@ PRODUCT_NAME="ShowMode"
 EXECUTABLE_NAME="ShowMode"
 MARKETING_VERSION="${SHOWMODE_MARKETING_VERSION:-1.0}"
 CURRENT_PROJECT_VERSION="${SHOWMODE_CURRENT_PROJECT_VERSION:-1}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-}"
 
 SWIFTC="/Applications/Xcode-14.3.1.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"
 SDK="/Applications/Xcode-14.3.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk"
@@ -102,6 +104,8 @@ cat > "$PLIST" <<EOF
     </array>
     <key>BuildMachineOSBuild</key>
     <string>22A400</string>
+    <key>GitHubToken</key>
+    <string>${GITHUB_TOKEN}</string>
 </dict>
 </plist>
 EOF
